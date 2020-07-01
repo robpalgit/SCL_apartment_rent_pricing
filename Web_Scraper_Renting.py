@@ -8,29 +8,22 @@ from datetime import date
 # Define web scraping function
 def web_scraper(url):
         
+    soup_list = []
     sauce = requests.get(url).text
     soup = BeautifulSoup(sauce)
-    soup_list = [soup]
+    soup_list.append(soup)
     
     arrow_buttons = soup.find_all('span', class_="andes-pagination__arrow-title")
-    for button in arrow_buttons:
-        if button.text=='Siguiente':
-            next_url = button.parent.get('href')
-            next_sauce = requests.get(next_url).text
-            next_soup = BeautifulSoup(next_sauce)
-            soup_list.append(next_soup)
-            next_arrow_buttons = next_soup.find_all('span', class_="andes-pagination__arrow-title")
-        
-            i=0
-            while len(next_arrow_buttons) > 1:
-                for button in next_arrow_buttons:
-                    if button.text=='Siguiente':
-                        next_url = button.parent.get('href')
-                        next_sauce = requests.get(next_url).text
-                        next_soup = BeautifulSoup(next_sauce)
-                        soup_list.append(next_soup)
-                        next_arrow_buttons = next_soup.find_all('span', class_="andes-pagination__arrow-title")
-                        i+=1
+    i=1
+    while arrow_buttons[0].text=='Siguiente' or len(arrow_buttons) > 1:
+        for button in arrow_buttons:
+            if button.text=='Siguiente':
+                url = button.parent.get('href')
+                sauce = requests.get(url).text
+                soup = BeautifulSoup(sauce)
+                soup_list.append(soup)
+                arrow_buttons = soup.find_all('span', class_="andes-pagination__arrow-title")
+        i+=1 
                 
     return soup_list
 
